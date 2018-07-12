@@ -16,5 +16,6 @@
 #define IDD_ABOUT 9005
 #define IDD_DIALOG 9006
 
+#define None NULL
 
 

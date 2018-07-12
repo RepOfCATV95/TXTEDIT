@@ -25,7 +25,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 									
 			SetMenu(hwnd, hMenu);
 			
-			hIcon = LoadImage(GetModuleHandle(NULL),
+			hIcon = LoadImage(GetModuleHandle(None),
 			TXTEDIT_ICONNAME,
 			IMAGE_ICON,
 			32,
@@ -35,7 +35,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 			else
 				MessageBox(hwnd, "Unable to load the large icon.","Error", MB_OK | MB_ICONERROR);
-			hIconSm = LoadImage(GetModuleHandle(NULL),
+			hIconSm = LoadImage(GetModuleHandle(None),
 			TXTEDIT_ICONNAME,
 			IMAGE_ICON,
 			16,
@@ -55,9 +55,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				TXTEDIT_HEIGHT, 
 				hwnd, 
 				(HMENU)IDC_MAIN_EDIT, 
-				GetModuleHandle(NULL), 
-				NULL);
-			if ( hEdit==NULL )
+				GetModuleHandle(None), 
+				None);
+			if ( hEdit==None )
 				MessageBox(hwnd, "Failed to create a text-editing box.", "Window Error", MB_OK | MB_ICONERROR);
 			hfDefault = GetStockObject(DEFAULT_GUI_FONT);
 			SendMessage(hEdit, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE,0));
@@ -70,7 +70,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			
 			GetClientRect(hwnd, &rcClient);
 			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-			SetWindowPos(hEdit, NULL, 0,0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
+			SetWindowPos(hEdit, None, 0,0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
 			break;
 		}
 		case WM_COMMAND:
@@ -120,21 +120,21 @@ BOOL LoadTextFileToEdit(HWND hEdit, LPCTSTR pszFileName)
 	HANDLE hFile;
 	BOOL bSuccess = FALSE;
 	
-	hFile = CreateFile(pszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	hFile = CreateFile(pszFileName, GENERIC_READ, FILE_SHARE_READ, None, OPEN_EXISTING, 0, None);
 	if (hFile!=INVALID_HANDLE_VALUE)
 	{
 		DWORD dwFileSize;
 		
-		dwFileSize = GetFileSize(hFile,NULL);
+		dwFileSize = GetFileSize(hFile,None);
 		if ( dwFileSize != 0xFFFFFFFF )
 		{
 			LPSTR pszFileText;
 			
 			pszFileText = GlobalAlloc(GPTR, dwFileSize + 1);
-			if (pszFileText!=NULL)
+			if (pszFileText!=None)
 			{
 				DWORD dwRead;
-				if (ReadFile(hFile,pszFileText,dwFileSize,&dwRead,NULL))
+				if (ReadFile(hFile,pszFileText,dwFileSize,&dwRead,None))
 				{
 					pszFileText[dwFileSize] = 0;
 					if (SetWindowText(hEdit,pszFileText))
@@ -153,8 +153,8 @@ BOOL SaveTextFileFromEdit(HWND hEdit, LPCTSTR pszFileName)
 	HANDLE hFile;
 	BOOL bSuccess = FALSE;
 	
-	hFile = CreateFile(pszFileName, GENERIC_WRITE, 0, NULL,
-	CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFile(pszFileName, GENERIC_WRITE, 0, None,
+	CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, None);
 	if (hFile!=INVALID_HANDLE_VALUE)
 	{
 		DWORD dwTextLength;
@@ -166,13 +166,13 @@ BOOL SaveTextFileFromEdit(HWND hEdit, LPCTSTR pszFileName)
 			DWORD dwBufferSize = dwTextLength + 1;
 			
 			pszText = GlobalAlloc(GPTR, dwBufferSize);
-			if (pszText != NULL)
+			if (pszText != None)
 			{
 				if (GetWindowText(hEdit, pszText, dwBufferSize))
 				{
 					DWORD dwWritten;
 					
-					if ( WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL) )
+					if ( WriteFile(hFile, pszText, dwTextLength, &dwWritten, None) )
 						bSuccess = TRUE;
 				}
 				GlobalFree(pszText);
@@ -224,28 +224,26 @@ BOOL CanOperateOpenSaveFile(HWND hwnd, BOOL bSaving)
 	}
 	return TRUE;
 }
-/* The 'main' function of Win32 GUI programs: this is where execution starts */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	WNDCLASSEX wc; /* A properties struct of our window */
-	HWND hwnd; /* A 'HANDLE', hence the H, or a pointer to our window */
-	MSG msg; /* A temporary location for all messages */
 
-	/* zero out the struct and set the stuff we want to modify */
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+	WNDCLASSEX wc;
+	HWND hwnd;
+	MSG msg;
+
 	memset(&wc,0,sizeof(wc));
 	wc.cbSize		 = sizeof(WNDCLASSEX);
-	wc.lpfnWndProc	 = WndProc; /* This is where we will send messages to */
+	wc.lpfnWndProc	 = WndProc;
 	wc.hInstance	 = hInstance;
-	wc.hCursor		 = LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor		 = LoadCursor(None, IDC_ARROW);
 	
-	/* White, COLOR_WINDOW is just a #define for a system color, try Ctrl+Clicking it */
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
 	wc.lpszMenuName = "MENUNAME";
 	wc.lpszClassName = "WindowClass";
-	wc.hIcon		 = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICONS)); /* Load a standard icon */
-	wc.hIconSm		 = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICONS), IMAGE_ICON,16,16,0); /* use the name "A" to use the project icon */
+	wc.hIcon		 = LoadIcon(GetModuleHandle(None), MAKEINTRESOURCE(IDI_ICONS)); /* Load a standard icon */
+	wc.hIconSm		 = (HICON)LoadImage(GetModuleHandle(None), MAKEINTRESOURCE(IDI_ICONS), IMAGE_ICON,16,16,0); /* use the name "A" to use the project icon */
 
 	if(!RegisterClassEx(&wc)) {
-		MessageBox(NULL, "Window Registration Failed!","Error!",MB_ICONEXCLAMATION|MB_OK);
+		MessageBox(None, "Unable to register Window class!\nPress OK to terminate the program.","Error!",MB_ICONEXCLAMATION|MB_OK);
 		return 0;
 	}
 
@@ -254,10 +252,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		CW_USEDEFAULT, /* y */
 		TXTEDIT_WIDTH, /* width */
 		TXTEDIT_HEIGHT, /* height */
-		NULL,NULL,hInstance,NULL);
+		None,None,hInstance,None);
 
-	if(hwnd == NULL) {
-		MessageBox(NULL, "Unable to load Windows application!","Error!",MB_ICONSTOP|MB_OK);
+	if(hwnd == None) {
+		MessageBox(None, "Unable to load Windows application!","Error!",MB_ICONSTOP|MB_OK);
 		return 0;
 	}
 
@@ -266,7 +264,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		sent to WndProc. Note that GetMessage blocks code flow until it receives something, so
 		this loop will not produce unreasonably high CPU usage
 	*/
-	while(GetMessage(&msg, NULL, 0, 0) > 0) { /* If no error is received... */
+	while(GetMessage(&msg, None, 0, 0) > 0) { /* If no error is received... */
 		TranslateMessage(&msg); /* Translate key codes to chars if present */
 		DispatchMessage(&msg); /* Send it to WndProc */
 	}
