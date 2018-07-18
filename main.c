@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <wchar.h>
 #include "rc95txtedit.h"
 
 /* This is where all the input to the window goes to */
@@ -12,16 +13,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			HICON hIcon, hIconSm;
 			HFONT hfDefault;
 			HWND hEdit;
-			hMenu = CreateMenu();
-			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, ID_FILE_OPEN,"Open");
-			AppendMenu(hSubMenu, MF_STRING, ID_FILE_SAVE,"Save");
-			AppendMenu(hSubMenu, MF_STRING, ID_FILE_EXIT,"E&xit");									
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&File");
 			
+			// Create the menu bar
+			hMenu = CreateMenu();
+			
+			// FILE MENU
 			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, ID_HELP_ABOUT, "&About");
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Help");
+			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_NEW,L"&New\tCtrl+N");
+			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_OPEN,L"Open\tCtrl+O");
+			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_SAVE,L"Save\tCtrl+S");
+			AppendMenuW(hSubMenu, MF_SEPARATOR, 0, None);			
+			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_EXIT,L"E&xit");									
+			AppendMenuW(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&File");
+			
+			// EDIT MENU
+			hSubMenu = CreatePopupMenu();
+			AppendMenuW(hSubMenu, MF_STRING, ID_EDIT_UNDO,L"Undo\tCtrl+Z");
+			AppendMenuW(hSubMenu, MF_SEPARATOR, 0, None);
+			AppendMenuW(hSubMenu, MF_STRING, ID_EDIT_CUT,L"Cu&t\tCtrl+X");
+			AppendMenuW(hSubMenu, MF_STRING, ID_EDIT_COPY,L"&Copy\tCtrl+C");
+			AppendMenuW(hSubMenu, MF_STRING, ID_EDIT_PASTE,L"&Paste\tCtrl+V");
+			AppendMenuW(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu,L"&Edit");
+			
+			// HELP MENU
+			hSubMenu = CreatePopupMenu();
+			AppendMenuW(hSubMenu, MF_STRING, ID_HELP_ABOUT, L"&About");
+			AppendMenuW(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&Help");
 									
 			SetMenu(hwnd, hMenu);
 			
@@ -34,7 +51,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			if (hIcon)
 				SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 			else
-				MessageBox(hwnd, "Unable to load the large icon.","Error", MB_OK | MB_ICONERROR);
+				MessageBoxW(hwnd, L"Unable to load the large icon.",L"Error", MB_OK | MB_ICONERROR);
 			hIconSm = LoadImage(GetModuleHandle(None),
 			TXTEDIT_ICONNAME,
 			IMAGE_ICON,
@@ -44,10 +61,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			if (hIconSm)
 				SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSm);
 			else
-				MessageBox(hwnd, "Unable to load the large icon.","Error", MB_OK | MB_ICONERROR);				
-			hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, 
-				"EDIT", 
-				"",
+				MessageBoxW(hwnd, L"Unable to load the large icon.",L"Error", MB_OK | MB_ICONERROR);				
+			hEdit = CreateWindowExW(WS_EX_CLIENTEDGE, 
+				L"EDIT", 
+				L"",
 				WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
 				0,
 				0,
@@ -58,7 +75,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				GetModuleHandle(None), 
 				None);
 			if ( hEdit==None )
-				MessageBox(hwnd, "Failed to create a text-editing box.", "Window Error", MB_OK | MB_ICONERROR);
+				MessageBoxW(hwnd, L"Failed to create a text-editing box.", L"Window Error", MB_OK | MB_ICONERROR);
 			hfDefault = GetStockObject(DEFAULT_GUI_FONT);
 			SendMessage(hEdit, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE,0));
 			break;
@@ -92,23 +109,43 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					CanOperateOpenSaveFile(hwnd, TRUE);
 					break;
 				}
+				case ID_EDIT_UNDO:
+				{
+					SendDlgItemMessage(hwnd, IDC_MAIN_EDIT, EM_UNDO, 0, 0);
+					break;
+				}
+				case ID_EDIT_CUT:
+				{
+					SendDlgItemMessage(hwnd, IDC_MAIN_EDIT, WM_CUT, 0, 0);
+					break;
+				}
+				case ID_EDIT_COPY:
+				{
+					SendDlgItemMessage(hwnd, IDC_MAIN_EDIT, WM_COPY, 0, 0);
+					break;
+				}
+				case ID_EDIT_PASTE:
+				{
+					SendDlgItemMessage(hwnd, IDC_MAIN_EDIT, WM_PASTE, 0, 0);
+					break;
+				}
 				case ID_HELP_ABOUT:
 				{
-					MessageBox(hwnd,"RC95 Text Editor\nVersion 4.0 (Build 1381)\nThe Chehot's Republic of CATV 95\nCopyright © 1997 - 2019\nAll rights reserved.","About RC95 Text Editor", 0);
+					MessageBoxA(hwnd,"RC95 Text Editor\nVersion 4.0 (Build 1381)\nThe Chehot's Republic of CATV 95\nCopyright © 1997 - 2019\nAll rights reserved.","About RC95 Text Editor", (UINT)None);
 					break;
 				}
 			}
 			break;
 		}
 		case WM_CLOSE:
+		{
 			DestroyWindow(hwnd);
 			break;
+		}
 		case WM_DESTROY: {
 			PostQuitMessage(0);
 			break;
 		}
-		
-		/* All other messages (a lot of them) are processed using default procedures */
 		default:
 			return DefWindowProc(hwnd, Message, wParam, lParam);
 	}
@@ -204,7 +241,7 @@ BOOL CanOperateOpenSaveFile(HWND hwnd, BOOL bSaving)
 		{		
 			if ( !SaveTextFileFromEdit(GetDlgItem(hwnd,IDC_MAIN_EDIT), szFileName) )
 			{
-				MessageBox(hwnd, "File Saving Error!\nUnable to save file.","File Operations Error",MB_OK|MB_ICONSTOP);
+				MessageBoxW(hwnd, L"File Saving Error!\nUnable to save file.",L"File Saving Error",MB_OK|MB_ICONSTOP);
 				return FALSE;
 			}
 			bSuccess=TRUE;			
@@ -217,7 +254,7 @@ BOOL CanOperateOpenSaveFile(HWND hwnd, BOOL bSaving)
 		{
 			if ( !LoadTextFileToEdit(GetDlgItem(hwnd, IDC_MAIN_EDIT), szFileName) )
 			{
-				MessageBox(hwnd, "File Opening Error!\nUnable to open file.","File Operations Error",MB_OK|MB_ICONSTOP);
+				MessageBox(hwnd, "File Opening Error!\nUnable to open file.","File Opening Error",MB_OK|MB_ICONSTOP);
 				return FALSE;
 			}
 		}
@@ -242,7 +279,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.hIcon		 = LoadIcon(GetModuleHandle(None), MAKEINTRESOURCE(IDI_ICONS)); /* Load a standard icon */
 	wc.hIconSm		 = (HICON)LoadImage(GetModuleHandle(None), MAKEINTRESOURCE(IDI_ICONS), IMAGE_ICON,16,16,0); /* use the name "A" to use the project icon */
 
-	if(!RegisterClassEx(&wc)) {
+	if	(!RegisterClassEx(&wc)) 
+	{
 		MessageBox(None, "Unable to register Window class!\nPress OK to terminate the program.","Error!",MB_ICONEXCLAMATION|MB_OK);
 		return 0;
 	}
@@ -254,19 +292,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		TXTEDIT_HEIGHT, /* height */
 		None,None,hInstance,None);
 
-	if(hwnd == None) {
+	if	(hwnd == None) 
+	{
 		MessageBox(None, "Unable to load Windows application!","Error!",MB_ICONSTOP|MB_OK);
 		return 0;
 	}
 
-	/*
-		This is the heart of our program where all input is processed and 
-		sent to WndProc. Note that GetMessage blocks code flow until it receives something, so
-		this loop will not produce unreasonably high CPU usage
-	*/
-	while(GetMessage(&msg, None, 0, 0) > 0) { /* If no error is received... */
-		TranslateMessage(&msg); /* Translate key codes to chars if present */
-		DispatchMessage(&msg); /* Send it to WndProc */
+	while	(GetMessage(&msg, None, 0, 0) > 0) 
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 	return msg.wParam;
 }
