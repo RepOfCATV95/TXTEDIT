@@ -2,6 +2,8 @@
 #include <wchar.h>
 #include "rc95txtedit.h"
 
+HINSTANCE hInstance;
+
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	switch(Message) {
@@ -22,6 +24,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_NEW,L"&New\tCtrl+N");
 			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_OPEN,L"Open\tCtrl+O");
 			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_SAVE,L"Save\tCtrl+S");
+			AppendMenuW(hSubMenu, MF_SEPARATOR, 0, None);
+			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_PRINT,L"Print\tCtrl+P");
 			AppendMenuW(hSubMenu, MF_SEPARATOR, 0, None);			
 			AppendMenuW(hSubMenu, MF_STRING, ID_FILE_EXIT,L"E&xit");									
 			AppendMenuW(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&File");
